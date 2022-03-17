@@ -60,9 +60,9 @@ class BeCaptcha:
 
 			results = await self.function(*args, **kwargs)
 			mouse_log = await mouse_movement(
-								every=self.every, 
-								until=self.min_movement * sum(pyautogui.size()), 
-								timeout=self.timeout)
+						every=self.every, 
+						until=self.min_movement * sum(pyautogui.size()), 
+						timeout=self.timeout)
 
 			benford_distrubution_integral = benford_correlation(mouse_log)
 
