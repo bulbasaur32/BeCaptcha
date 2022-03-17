@@ -1,5 +1,5 @@
 # BeCaptcha
-Detection of Automated Software.
+Automated Detection of Automated Software.
 
 ```python
 """
