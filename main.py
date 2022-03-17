@@ -1,6 +1,9 @@
-import pyautogui
-import math
 import asyncio
+import time
+import math
+
+import pyautogui
+
 
 
 
@@ -8,15 +11,15 @@ async def mouse_movement(every, until, timeout):
 
 	iteration = 0
 	pixel_log = []
-  x_prev, y_prev = pyautogui.position()
-  
+	x_prev, y_prev = pyautogui.position()
+
 	while sum(pixel_log) < until and iteration * every < timeout:
 
 		x, y = pyautogui.position()
 		pixel_log.append(abs(x - x_prev))
 		pixel_log.append(abs(y - y_prev))
 
-		asyncio.sleep(every)
+		time.sleep(every)
 		x_prev, y_prev = x, y
 		iteration += 1
 
@@ -42,7 +45,7 @@ def benford_correlation(dataset):
 
 class BeCaptcha:
 
-	def __init__(self, function, min_movement=0.4, every=0.025, threshold=0.7, timeout=5):
+	def __init__(self, function, min_movement=0.4, every=0.025, threshold=0.7, timeout=10):
 
 		self.function = function
 		self.min_movement = min_movement
@@ -53,11 +56,20 @@ class BeCaptcha:
 
 	def __call__(self, *args, **kwargs):
 
-		mouse_log = mouse_movement(every=self.every, until=self.min_movement * sum(pyautogui.size()), timeout=self.timeout)
-		benford_distrubution_integral = benford_correlation(mouse_log)
-		results = self.function(*args, **kwargs)
+		async def __inner__():
 
-		print(benford_distrubution_integral)
+			results = await self.function(*args, **kwargs)
+			mouse_log = await mouse_movement(
+								every=self.every, 
+								until=self.min_movement * sum(pyautogui.size()), 
+								timeout=self.timeout)
 
-		return (True, results) if benford_distrubution_integral < self.threshold else (False, results)
+			benford_distrubution_integral = benford_correlation(mouse_log)
+
+			return (True, results) if benford_distrubution_integral < self.threshold else (False, results)
+
+
+		return asyncio.run(__inner__())
+
+
 
